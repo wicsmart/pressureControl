@@ -10,40 +10,38 @@ INDEX_NAME, DOC_TYPE = 'pressure', '_doc'
 
 class elastic(object):
     
-    _es None
+    connection = None
 
-     def __init__(self, host, endereco, porta):
-         self.host = host
+    def __init__(self, endereco, porta):
          self.endereco = endereco
-         self.port = porta
+         self.porta = porta
+         self.connection = Elasticsearch([{'host':endereco, 'port': porta}])
 
-    def store_record(elastic_object, record):
+    def store_record(self, record):
         try:
-            print elastic_object.index(
+            self.connection.index(
                 index=INDEX_NAME, doc_type=DOC_TYPE, body=record)
         except Exception as ex:
             print('Error in indexing data')
             print(str(ex))
 
 
-    def store_bulk(elastic_object, bulk):
+    def store_bulk(self, bulk):
         try:
-            print helpers.bulk(elastic_object, bulk, True)
+            print helpers.bulk(self.connection, bulk, True)
         except Exception as ex:
             print('Error in indexing data')
             # print(str(ex))
 
 
-    def connect_elasticsearch(endereco, porta):
-        _es = None
-        _es = Elasticsearch([{'host': endereco, 'port': porta}])
-        if _es.ping():
-            print 'Elastisearch Connect'
+    def isConnected(self):
+        if self.connection.ping():
+            return True
         else:
             print 'Elastisearch is not connect!'
-        return _es
+        return False
 
-        def create_index(es_object):
+    def create_index(self):
         created = False
         settings = {
             "settings": {
@@ -62,8 +60,8 @@ class elastic(object):
             }
         }
         try:
-            if not es_object.indices.exists(INDEX_NAME):
-                es_object.indices.create(
+            if not self.connection.indices.exists(INDEX_NAME):
+                self.connection.indices.create(
                     index=INDEX_NAME, body=settings)
                 print('Created Index')
                 created = True
@@ -74,7 +72,7 @@ class elastic(object):
         finally:
             return created
 
-        def create_empty_index(es_object):
+    def create_empty_index(self):
         created = False
         settings = {
             "settings": {
@@ -82,26 +80,26 @@ class elastic(object):
                 "number_of_replicas": 1
             },
             "mappings": {
-                "_doc": {
+             
                     "properties": {
                         "data_hora": {
                             "type":   "date",
                             "format": "dd/MM/yyyy HH:mm:ss||epoch_millis"
                         }
                     }
-                }
+            
             }
         }
         try:
-            if not es_object.indices.exists(INDEX_NAME):
-                es_object.indices.create(
+            if not self.connection.indices.exists(INDEX_NAME):
+                self.connection.indices.create(
                     index=INDEX_NAME, body=settings)
                 print('Created Index')
                 created = True
             else:
-                print es_object.indices.delete(index=INDEX_NAME) 
+                print self.connection.indices.delete(index=INDEX_NAME) 
                 
-                print es_object.indices.create(
+                print self.connection.indices.create(
                     index=INDEX_NAME, body=settings)
                 
                 created = True
