@@ -1,0 +1,36 @@
+version: '3.1'
+services:
+  elasticsearch:
+    build:
+      context: ./elasticsearch
+      dockerfile: Dockerfile
+    container_name: elasticsearch-pressure
+    environment:
+      - discovery.type=single-node
+      - action.auto_create_index=true
+    ports:
+      - '9220:9200'
+      - '9330:9300'
+    volumes:
+      - './data/elastic:/data/elk'
+    networks:
+      rede-pressure:
+        aliases:
+          - elasticsearch
+  kibana:
+    build:
+      context: ./kibana
+      dockerfile: Dockerfile
+    container_name: kibana-pressure
+    ports:
+      - '5661:5601'
+    volumes:
+      - './data/elastic:/data/kibana'
+    depends_on:
+      - elasticsearch
+    networks:
+      rede-pressure:
+        aliases:
+          - kibana
+networks:
+  rede-pressure: null

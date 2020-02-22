@@ -1,0 +1,21 @@
+
+# Default Kibana configuration for docker target
+
+server.name: kibana
+server.host: "0"
+elasticsearch.hosts: [ "http://elasticsearch:9200" ]
+
+map.regionmap:
+  includeElasticMapsService: false
+  layers:
+     - name: "Rio de Janeiro"
+       url: "http://localhost:8001/municipios.geojson"
+       attribution: "https://github.com/tbrugz/geodata-br"
+       fields:
+          - name: "sucursal"
+            description: "Sucursal"
+          - name: "name"
+            description: "Municipio"
+
+server.cors: true
+server.cors.origin: ['*']
